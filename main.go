@@ -49,8 +49,8 @@ func PushChanges(config *Config) {
 		out, err := cmd.Output()
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
+		} else {
+			fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
 		}
-
-		fmt.Printf("%d: %v\n", i+1, string(out))
 	}
 }
