@@ -67,7 +67,7 @@ func ReadConfig(path string) Config {
 
 func PullUpdated(config *Config) {
 	for i, repo := range config.Repos {
-		cmd := exec.Command("git", "pull", "--all")
+		cmd := exec.Command("git", "fetch", "--all")
 		cmd.Dir = repo.Path
 
 		out, err := cmd.Output()
