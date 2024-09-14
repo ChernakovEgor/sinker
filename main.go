@@ -43,7 +43,7 @@ func ReadConfig(path string) Config {
 
 func PushChanges(config *Config) {
 	for i, repo := range config.Repos {
-		cmd := exec.Command("git", "push", "dev")
+		cmd := exec.Command("git", "status", "--porcelain")
 		cmd.Dir = repo.Path
 
 		out, err := cmd.Output()
