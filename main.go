@@ -91,6 +91,9 @@ func PushChanges(config *Config) {
 			if len(out) > 0 {
 				fmt.Printf("%d - %s: %v\n", i+1, repo.Name, "uncommited changes")
 			} else {
+				cmd = exec.Command("git", "push", "--all")
+				cmd.Dir = repo.Path
+				out, _ := cmd.Output()
 				fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
 			}
 		}
