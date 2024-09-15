@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,8 +21,10 @@ Commands:
 type Config struct {
 	Remote string
 	Repos  []struct {
-		Name string
-		Path string
+		Name        string
+		Path        string
+		Auto_Commit bool
+		Auto_merge  bool
 	}
 }
 
@@ -67,35 +70,67 @@ func ReadConfig(path string) Config {
 
 func PullUpdated(config *Config) {
 	for i, repo := range config.Repos {
-		cmd := exec.Command("git", "fetch", "--all")
-		cmd.Dir = repo.Path
+		var errb bytes.Buffer
+		fetch := exec.Command("git", "fetch", "--all")
+		fetch.Dir = repo.Path
+		fetch.Stderr = &errb
 
-		out, err := cmd.Output()
+		out, err := fetch.Output()
+
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%d - %s: %v\n", i+1, repo.Name, err)
-		} else {
-			fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
+			fmt.Fprintf(os.Stderr, "error %d - %s: %v\n", i+1, repo.Name, errb.String())
+			continue
 		}
+
+		if repo.Auto_merge {
+			merge := exec.Command("git", "pull", "dev")
+			merge.Dir = repo.Path
+			merge.Stderr = &errb
+
+			out, err = merge.Output()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
+				continue
+			}
+		}
+		fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
 	}
 }
 
 func PushChanges(config *Config) {
+	var errb bytes.Buffer
 	for i, repo := range config.Repos {
-		cmd := exec.Command("git", "status", "--porcelain")
-		cmd.Dir = repo.Path
+		status := exec.Command("git", "status", "--porcelain")
+		status.Dir = repo.Path
+		status.Stderr = &errb
 
-		out, err := cmd.Output()
+		out, err := status.Output()
+
 		if err != nil {
-			fmt.Fprint(os.Stderr, err)
-		} else {
-			if len(out) > 0 {
-				fmt.Printf("%d - %s: %v\n", i+1, repo.Name, "uncommited changes")
-			} else {
-				cmd = exec.Command("git", "push", "--all")
-				cmd.Dir = repo.Path
-				out, _ := cmd.Output()
-				fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
-			}
+			fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
+			continue
 		}
+		if len(out) > 0 {
+			fmt.Printf("%d - %s: %v\n", i+1, repo.Name, "uncommited changes")
+			continue
+		}
+
+		// TODO: add --dry-run ??
+		push := exec.Command("git", "push", "--all", "--dry-run")
+		push.Dir = repo.Path
+		push.Stderr = &errb
+
+		out, err = push.Output()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
+			continue
+		}
+
+		// if string(out) == "" {
+		// fmt.Fprintf(os.Stderr, "%d - %s: %s\n", i+1, repo.Name, errb.String())
+		// } else {
+		fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
+		// }
+
 	}
 }
