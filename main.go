@@ -98,8 +98,8 @@ func PullUpdated(config *Config) {
 }
 
 func PushChanges(config *Config) {
-	var errb bytes.Buffer
 	for i, repo := range config.Repos {
+		var errb bytes.Buffer
 		status := exec.Command("git", "status", "--porcelain")
 		status.Dir = repo.Path
 		status.Stderr = &errb
@@ -111,8 +111,21 @@ func PushChanges(config *Config) {
 			continue
 		}
 		if len(out) > 0 {
-			fmt.Printf("%d - %s: %v\n", i+1, repo.Name, "uncommited changes")
-			continue
+			if !repo.Auto_Commit {
+				fmt.Printf("%d - %s: Uncommited changes\n\n", i+1, repo.Name)
+				continue
+			} else {
+				addAndCommit := exec.Command("git", "add", ":", "&&", "git-commit", "--message=\"auto\"", "--dry-run")
+				fmt.Println("command is", addAndCommit.String())
+				addAndCommit.Dir = repo.Path
+				addAndCommit.Stderr = &errb
+				_, err := addAndCommit.Output()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
+					continue
+				}
+				fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
+			}
 		}
 
 		// TODO: add --dry-run ??
@@ -120,17 +133,13 @@ func PushChanges(config *Config) {
 		push.Dir = repo.Path
 		push.Stderr = &errb
 
-		out, err = push.Output()
+		_, err = push.Output()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error %d - %s: %s\n", i+1, repo.Name, errb.String())
 			continue
 		}
 
-		// if string(out) == "" {
-		// fmt.Fprintf(os.Stderr, "%d - %s: %s\n", i+1, repo.Name, errb.String())
-		// } else {
-		fmt.Printf("%d - %s: %v\n", i+1, repo.Name, string(out))
-		// }
+		fmt.Printf("%d - %s: %v\n", i+1, repo.Name, errb.String())
 
 	}
 }
