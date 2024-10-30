@@ -1,7 +1,5 @@
 run:
-	go build -C ./cmd/ -o sinker && ./cmd/sinker
-
-tests:
+	go build -o sinker ./cmd/main.go && ./sinker
 
 clean:
-	go -C ./cmd/ clean
+	rm sinker

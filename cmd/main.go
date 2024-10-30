@@ -1,10 +1,21 @@
 package main
 
 import (
+	// "fmt"
 	"fmt"
-	"github.com/ChernakovEgor/sinker/internal/load"
+	reader "github.com/ChernakovEgor/sinker/internal/config_reader"
+	"os"
+	"os/exec"
 )
 
 func main() {
-	fmt.Println(load.ReadConfig("/Users/egor/developer/pet/repo_pusher/config.toml"))
+	config, err := reader.ReadConfig("config.toml")
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	cmd := exec.Command
+
+	fmt.Println(*config)
 }

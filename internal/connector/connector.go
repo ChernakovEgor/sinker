@@ -12,11 +12,12 @@ type Connection interface {
 
 type SSHConnection struct {
 	host string
+	user string
 	port string
 }
 
-func CreateSSHConnection(host, port string) *SSHConnection {
-	return &SSHConnection{host, port}
+func CreateSSHConnection(host, user, port string) *SSHConnection {
+	return &SSHConnection{host, user, port}
 }
 
 func (s SSHConnection) Ping() (ok bool) {
