@@ -1,9 +1,8 @@
-package load
+package connector
 
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 )
 
@@ -14,6 +13,10 @@ type Connection interface {
 type SSHConnection struct {
 	host string
 	port string
+}
+
+func CreateSSHConnection(host, port string) *SSHConnection {
+	return &SSHConnection{host, port}
 }
 
 func (s SSHConnection) Ping() (ok bool) {
@@ -28,18 +31,4 @@ func (s SSHConnection) Ping() (ok bool) {
 	}
 
 	return true
-}
-
-func ReadConfig(configPath string) error {
-	file, err := os.Open(configPath)
-	if err != nil {
-		return fmt.Errorf("could not open file: %v", err)
-	}
-	defer file.Close()
-
-	var conn Connection = SSHConnection{"git@egorgeous.xyz", "903"}
-	if !conn.Ping() {
-		return fmt.Errorf("could not connect via ssh\n")
-	}
-	return nil
 }
