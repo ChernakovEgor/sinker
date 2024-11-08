@@ -1,7 +1,6 @@
 package repo_server
 
 import (
-	"context"
 	"testing"
 
 	cr "github.com/ChernakovEgor/sinker/internal/config_reader"
@@ -10,7 +9,7 @@ import (
 type StubShell struct {
 }
 
-func (s StubShell) Execute(ctx context.Context, cmd string) ([]byte, error) {
+func (s StubShell) Execute(cmd string) ([]byte, error) {
 	return nil, nil
 }
 

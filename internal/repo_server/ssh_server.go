@@ -1,21 +1,21 @@
 package repo_server
 
 import (
-	"context"
 	cr "github.com/ChernakovEgor/sinker/internal/config_reader"
 	"os/exec"
 )
 
 type Shell interface {
-	Execute(ctx context.Context, cmd string) ([]byte, error)
+	Execute(cmd string) ([]byte, error)
 }
 
 // LocalShell - default shell executor
 type LocalShell struct {
 }
 
-func (_ LocalShell) Execute(ctx context.Context, cmd string) ([]byte, error) {
-	localShell := exec.CommandContext(ctx, cmd)
+func (_ LocalShell) Execute(cmd string) ([]byte, error) {
+	// localShell := exec.CommandContext(ctx, cmd)
+	localShell := exec.Command(cmd)
 	return localShell.CombinedOutput()
 }
 

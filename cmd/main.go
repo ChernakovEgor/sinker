@@ -5,7 +5,7 @@ import (
 	"fmt"
 	reader "github.com/ChernakovEgor/sinker/internal/config_reader"
 	"os"
-	"os/exec"
+	// "os/exec"
 )
 
 func main() {
@@ -14,8 +14,6 @@ func main() {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(1)
 	}
-
-	cmd := exec.Command
 
 	fmt.Println(*config)
 }
